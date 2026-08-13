@@ -1,0 +1,144 @@
+import express from 'express';
+import morgan from 'morgan';
+import { expressjwt } from 'express-jwt';
+import type { Request as JWTRequest } from 'express-jwt';
+import { DailyObjectives } from './static/DailyObjectives';
+import { LevelProgressionMaps } from './static/LevelProgressionMaps';
+
+const public_url: RegExp[] = [
+	/\/cdn\/.*/,
+	/\/api\/versioncheck\/v.*/,
+	/\/api\/config\/v.*/,
+	/\/api\/platformlogin\/v.*/,
+	/\/api\/images\/v.*\/named/,
+]
+
+const app = express();
+
+app.use(morgan('dev')); //Logging of requests
+app.use(express.json())                          //used for req.body
+app.use(express.urlencoded({ extended: true })); //used for req.body
+
+//Authorization with error checking
+app.use(expressjwt({secret: Bun.env.JWT_SECRET, algorithms: ["HS256"]}).unless({path: public_url}));
+app.use(function(err: any, req: any, res: any, next: any) {
+    if(err.name === 'UnauthorizedError') 
+	{
+		res.sendStatus(401);
+		return;
+    }
+	else if (err) {
+		console.log(err)
+		res.sendStatus(500);
+		return;
+	}
+ 	next();
+});
+
+/*
+	===ROUTES===
+*/
+
+import CdnRouter from './routes/cdn'
+app.use("/cdn", CdnRouter)
+
+import ImagesRouter from './routes/images'
+app.use("/api/images", ImagesRouter)
+
+import PlatformLoginRouter from './routes/platformlogin'
+app.use("/api/platformlogin", PlatformLoginRouter)
+
+import PlayerRouter from './routes/players'
+app.use("/api/players", PlayerRouter)
+
+import SettingsRouter from './routes/settings'
+app.use("/api/settings", SettingsRouter)
+
+import AvatarRouter from './routes/avatar'
+app.use("/api/avatar", AvatarRouter)
+
+import ActivityRouter from './routes/activities'
+app.use("/api/activities", ActivityRouter)
+
+import GameSessionRouter from './routes/gamesession'
+app.use("/api/gamesessions", GameSessionRouter)
+
+import PlayerReportingRouter from './routes/playerreporting'
+app.use("/api/PlayerReporting", PlayerReportingRouter)
+
+import LeaderboardRouter from './routes/leaderboard'
+app.use("/api/Leaderboard/v:version", LeaderboardRouter)
+
+/*
+	===Misc. APIs that are safe to chill here===
+*/
+
+app.get('/api/versioncheck/v:version', (req, res) => {
+	if (!Bun.env.VERSION_CHECK)
+		console.warn("VERSION_CHECK environment variable is not set!");
+
+	const version = req.query.v;
+
+	if (Bun.env.IGNORE_VERSION_CHECK === "true") 
+		return res.json({ ValidVersion: true });
+
+	if (version === Bun.env.VERSION_CHECK) 
+		return res.json({ ValidVersion: true });
+	else 
+		return res.json({ ValidVersion: false });
+});
+
+app.get('/api/config/v:version', (req, res) => {
+	res.json({
+		MessageOfTheDay: Bun.env.MOTD || "Welcome to Coach's Time Machine! Change this in the .env file.",
+		CdnBaseUri: req.protocol + '://' + req.get('host') + '/cdn',
+		LevelProgressionMaps: LevelProgressionMaps,
+		MatchmakingParams: { PreferFullRoomsFrequency: 1, PreferEmptyRoomsFrequency: 0 },
+		DailyObjectives: DailyObjectives,
+		ConfigTable: [{Key: "Gift.DropChance", Value: "0.5"}, {Key: "Gift.XP", Value: "0.5"}],
+		PhotonConfig: { CloudRegion: "us", CrcCheckEnabled: false, EnableServerTracingAfterDisconnect: false }
+	});
+});
+
+app.get('/api/config/v:version/amplitude', (req, res) => {
+    res.json({ AmplitudeKey: Bun.env.AMPLITUDE_KEY || "NoKeyProvided" });
+});
+
+app.get('/api/messages/v:version/get', (req, res) => {
+	res.json([]); //TODO: Reverse engineer this.
+});
+
+app.get('/api/relationships/v:version/get', (req, res) => {
+	res.json([]); //TODO: Reverse engineer this.
+});
+
+app.get('/api/equipment/v:version/getUnlocked', (req, res) => {
+	res.json([]); //TODO: Reverse engineer this.
+});
+
+app.get('/api/events/v:version/list', (req, res) => {
+	res.json([]); //TODO: Reverse engineer this.
+});
+
+//This is for weekly challenges.
+//TODO: Properly implement
+app.get('/api/challenge/v:version/getCurrent', (req, res) => {
+	//This system sucks ass.
+
+	const date = Date.now()
+
+	const data = {
+		ChallengeMapId: 1,
+		StartAt: date - 864000, //1 day
+		EndAt: date + 6048000000000, //1 week
+		ServerTime: date,
+		Challenges: [], //RecNet.DEMFBKIKHDN
+		Gifts: [], //RecNet.GEDPICALELM
+		ChallengeThemeString: "Placeholder Weekly so Daily challenges can work",
+		ChallengeThemeId: 1
+	}
+
+	res.json({ Success: true, Message: JSON.stringify(data) });
+});
+
+export default app;
