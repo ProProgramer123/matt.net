@@ -1,13 +1,17 @@
 import express from 'express';
-import path from 'path'
+import path from 'path';
 import type { Request as JWTRequest } from 'express-jwt';
 import multer from 'multer';
+import { fileURLToPath } from 'node:url';
 
 import { eq } from "drizzle-orm";
 import db from '../db/database'
 import { users } from '../db/schema';
 import { send_ws_message, WebsocketResponses } from '../websocket';
 import { get_account_data } from '../db/datamanager';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const upload = multer({ storage: multer.diskStorage({
     destination: (req, file, cb) => {
@@ -22,7 +26,7 @@ const upload = multer({ storage: multer.diskStorage({
 const router = express.Router();
 
 router.get('/v:version/named', async (req, res) => {
-    if (Bun.env.USE_NAMED_IMAGES == "false")
+    if (process.env.USE_NAMED_IMAGES == "false")
         return res.sendStatus(404)
 
     const image = req.query.img
@@ -83,7 +87,7 @@ router.post('/v:version/sendlink', (req: JWTRequest, res) => {
             FromPlayerId: 1,
             SentTime: Date.now(),
             Type: 100, //IMGPDLHMJEE.FCHPDJPIBHM
-            Data: `You can view your image here: ${Bun.env.CDN_BASE_URI || req.url + "/cdn"}/image/${req.body.ImageName}.png`
+            Data: `You can view your image here: ${process.env.CDN_BASE_URI || req.url + "/cdn"}/image/${req.body.ImageName}.png`
         }
     })
 

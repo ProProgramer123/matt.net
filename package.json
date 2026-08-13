@@ -5,9 +5,12 @@
   "private": true,
   "scripts": {
     "build-db": "bunx drizzle-kit push",
-    "run": "bun ."
+    "run": "bun .",
+    "build": "tsc --noEmit",
+    "dev": "bun run src/index.ts"
   },
   "devDependencies": {
+    "@types/better-sqlite3": "^9.6.0",
     "@types/bun": "latest",
     "@types/express": "^5.0.6",
     "@types/express-jwt": "^7.4.4",

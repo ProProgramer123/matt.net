@@ -17,3 +17,10 @@ interface RecRoomPlayer
     HasBirthday: boolean;
     EmailEnteredAt?: string;
 }
+
+interface PlatformIdResponse
+{
+    Platform: number;
+    PlatformId: string;
+    Player: RecRoomPlayer;
+}

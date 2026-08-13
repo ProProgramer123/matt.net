@@ -37,7 +37,7 @@ router.post('/v:version', async (req, res) => {
 		platformId: req.body.PlatformId
 	}
 
-    const token = Jwt.sign(jwt_data, Bun.env.JWT_SECRET, { expiresIn: '12h' });
+    const token = Jwt.sign(jwt_data, process.env.JWT_SECRET || 'development-secret', { expiresIn: '12h' });
 
     return res.json({ Token: token, PlayerId: req.body.PlayerId, Error: "" });
 });

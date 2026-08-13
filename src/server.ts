@@ -5,6 +5,8 @@ import type { Request as JWTRequest } from 'express-jwt';
 import { DailyObjectives } from './static/DailyObjectives';
 import { LevelProgressionMaps } from './static/LevelProgressionMaps';
 
+const jwtSecret = process.env.JWT_SECRET || 'development-secret';
+
 const public_url: RegExp[] = [
 	/\/cdn\/.*/,
 	/\/api\/versioncheck\/v.*/,
@@ -20,7 +22,7 @@ app.use(express.json())                          //used for req.body
 app.use(express.urlencoded({ extended: true })); //used for req.body
 
 //Authorization with error checking
-app.use(expressjwt({secret: Bun.env.JWT_SECRET, algorithms: ["HS256"]}).unless({path: public_url}));
+app.use(expressjwt({secret: jwtSecret, algorithms: ["HS256"]}).unless({path: public_url}));
 app.use(function(err: any, req: any, res: any, next: any) {
     if(err.name === 'UnauthorizedError') 
 	{
@@ -74,15 +76,15 @@ app.use("/api/Leaderboard/v:version", LeaderboardRouter)
 */
 
 app.get('/api/versioncheck/v:version', (req, res) => {
-	if (!Bun.env.VERSION_CHECK)
+	if (!process.env.VERSION_CHECK)
 		console.warn("VERSION_CHECK environment variable is not set!");
 
 	const version = req.query.v;
 
-	if (Bun.env.IGNORE_VERSION_CHECK === "true") 
+	if (process.env.IGNORE_VERSION_CHECK === "true") 
 		return res.json({ ValidVersion: true });
 
-	if (version === Bun.env.VERSION_CHECK) 
+	if (version === process.env.VERSION_CHECK) 
 		return res.json({ ValidVersion: true });
 	else 
 		return res.json({ ValidVersion: false });
@@ -90,7 +92,7 @@ app.get('/api/versioncheck/v:version', (req, res) => {
 
 app.get('/api/config/v:version', (req, res) => {
 	res.json({
-		MessageOfTheDay: Bun.env.MOTD || "Welcome to Coach's Time Machine! Change this in the .env file.",
+		MessageOfTheDay: process.env.MOTD || "Welcome to Coach's Time Machine! Change this in the .env file.",
 		CdnBaseUri: req.protocol + '://' + req.get('host') + '/cdn',
 		LevelProgressionMaps: LevelProgressionMaps,
 		MatchmakingParams: { PreferFullRoomsFrequency: 1, PreferEmptyRoomsFrequency: 0 },
@@ -101,7 +103,7 @@ app.get('/api/config/v:version', (req, res) => {
 });
 
 app.get('/api/config/v:version/amplitude', (req, res) => {
-    res.json({ AmplitudeKey: Bun.env.AMPLITUDE_KEY || "NoKeyProvided" });
+    res.json({ AmplitudeKey: process.env.AMPLITUDE_KEY || "NoKeyProvided" });
 });
 
 app.get('/api/messages/v:version/get', (req, res) => {
