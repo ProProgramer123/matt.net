@@ -65,6 +65,54 @@ app.get('/api/health', (req, res) => {
 });
 
 // ============================================
+// API INFO ENDPOINT
+// ============================================
+app.get('/api', (req, res) => {
+  res.json({
+    success: true,
+    server: 'Matt.net Custom Rec Room Servers',
+    status: 'online',
+    version: dataCache.version || '1.0.0',
+    credits: 'Powered by RebornRec',
+    documentation: 'Full API documentation',
+    endpoints: {
+      health: {
+        'GET /health': 'Health check',
+        'GET /api/health': 'Health check (alias)',
+      },
+      rooms: {
+        'GET /api/rooms': 'Get all rooms',
+        'GET /api/rooms/base': 'Get base rooms',
+        'GET /api/rooms/community': 'Get community rooms',
+        'GET /api/rooms/hot': 'Get hot rooms',
+        'GET /api/rooms/:roomId': 'Get specific room',
+        'POST /api/rooms/:roomId/join': 'Join a room',
+      },
+      avatar: {
+        'GET /api/avatar/default': 'Get default avatar',
+        'GET /api/items/avatar': 'Get avatar items',
+        'GET /api/items/equipment': 'Get equipment items',
+        'GET /api/items/consumables': 'Get consumable items',
+      },
+      config: {
+        'GET /api/config': 'Get all configurations',
+        'GET /api/config/:key': 'Get specific config',
+      },
+      players: {
+        'GET /api/players/banned': 'Get banned players list',
+      },
+      auth: {
+        'POST /api/login': 'Login (username/password)',
+        'POST /api/server/init': 'Initialize server session',
+      },
+      messages: {
+        'GET /api/motd': 'Get message of the day',
+      },
+    },
+  });
+});
+
+// ============================================
 // ROOM ENDPOINTS
 // ============================================
 app.get('/api/rooms', (req, res) => {
