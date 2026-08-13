@@ -19,3 +19,6 @@ This repository includes:
 ## License
 
 This project uses resources and knowledge from RebornRec. Please refer to RebornRec's original project for licensing information.
+
+## DISCLAIMER!!!
+This project is not affiliated with Rec Room in any way, nor intends to infringe on their copyrights. Distributing old versions of Rec Room is copyright infringement, so that's why matt.net does not come bundled with Rec Room at all.
