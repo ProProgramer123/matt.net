@@ -2,12 +2,16 @@
   "name": "matt-net",
   "version": "1.0.0",
   "private": true,
-  "description": "Matt.net game revival backend",
+  "description": "Matt.net API bridge for a game revival",
   "scripts": {
-    "dev": "vercel dev"
+    "dev": "vercel dev",
+    "start": "vercel dev"
   },
   "engines": {
     "node": ">=20"
+  },
+  "dependencies": {
+    "@vercel/node": "^5.4.0"
   },
   "devDependencies": {
     "vercel": "^48.0.0"
