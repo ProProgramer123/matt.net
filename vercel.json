@@ -1,8 +1,5 @@
 {
   "version": 2,
-  "env": {
-    "SERVER_URL": "@server_url"
-  },
   "builds": [
     {
       "src": "api/index.js",
