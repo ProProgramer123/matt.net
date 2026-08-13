@@ -11,6 +11,7 @@
     "node": "24.x"
   },
   "dependencies": {
+    "@vercel/analytics": "^2.0.1",
     "@vercel/node": "^5.4.0"
   },
   "devDependencies": {
