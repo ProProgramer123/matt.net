@@ -53,6 +53,17 @@ app.get('/health', (req, res) => {
   });
 });
 
+// Also available at /api/health
+app.get('/api/health', (req, res) => {
+  res.json({
+    status: 'ok',
+    server: 'Matt.net Custom Rec Room Server',
+    version: dataCache.version || '1.0.0',
+    credits: 'Powered by RebornRec',
+    timestamp: new Date().toISOString(),
+  });
+});
+
 // ============================================
 // ROOM ENDPOINTS
 // ============================================
@@ -275,7 +286,7 @@ app.get('/', (req, res) => {
     credits: 'Powered by RebornRec',
     documentation: 'Available at /api/docs',
     endpoints: {
-      health: '/health',
+      health: ['/health', '/api/health'],
       rooms: '/api/rooms',
       avatar: '/api/avatar/default',
       config: '/api/config',
@@ -295,14 +306,23 @@ app.use((req, res) => {
     path: req.path,
     available: [
       '/health',
+      '/api/health',
       '/api/rooms',
       '/api/rooms/base',
       '/api/rooms/community',
+      '/api/rooms/hot',
       '/api/rooms/:roomId',
       '/api/avatar/default',
       '/api/items/avatar',
       '/api/items/equipment',
+      '/api/items/consumables',
       '/api/config',
+      '/api/config/:key',
+      '/api/players/banned',
+      '/api/motd',
+      'POST /api/login',
+      'POST /api/server/init',
+      'POST /api/rooms/:roomId/join',
     ],
   });
 });
