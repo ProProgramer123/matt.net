@@ -17,12 +17,24 @@ const public_url: RegExp[] = [
 
 const app = express();
 
+app.use((req, res, next) => {
+	res.header('Access-Control-Allow-Origin', '*');
+	res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+	res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+	if (req.method === 'OPTIONS')
+		return res.sendStatus(204);
+	next();
+});
+
 app.use(morgan('dev')); //Logging of requests
 app.use(express.json())                          //used for req.body
 app.use(express.urlencoded({ extended: true })); //used for req.body
 
 //Authorization with error checking
-app.use(expressjwt({secret: jwtSecret, algorithms: ["HS256"]}).unless({path: public_url}));
+app.use(expressjwt({secret: jwtSecret, algorithms: ["HS256"]}).unless({
+	path: [...public_url, '/', '/favicon.ico'],
+	method: ['GET', 'OPTIONS', 'HEAD']
+}));
 app.use(function(err: any, req: any, res: any, next: any) {
     if(err.name === 'UnauthorizedError') 
 	{
@@ -74,6 +86,10 @@ app.use("/api/Leaderboard/v:version", LeaderboardRouter)
 /*
 	===Misc. APIs that are safe to chill here===
 */
+
+app.get('/', (req, res) => {
+	res.json({ ok: true, message: 'Server is running' });
+});
 
 app.get('/api/versioncheck/v:version', (req, res) => {
 	if (!process.env.VERSION_CHECK)
