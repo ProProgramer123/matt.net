@@ -6,6 +6,7 @@ import { DailyObjectives } from './static/DailyObjectives';
 import { LevelProgressionMaps } from './static/LevelProgressionMaps';
 
 const jwtSecret = process.env.JWT_SECRET || 'development-secret';
+const publicOrigin = process.env.APP_ORIGIN || process.env.RENDER_EXTERNAL_URL || 'https://matt-net.onrender.com';
 
 const public_url: RegExp[] = [
 	/\/cdn\/.*/,
@@ -13,11 +14,17 @@ const public_url: RegExp[] = [
 	/\/api\/config\/v.*/,
 	/\/api\/platformlogin\/v.*/,
 	/\/api\/images\/v.*\/named/,
+	/\//,
 ]
 
 const app = express();
 
+app.set('trust proxy', 1);
+
 app.use((req, res, next) => {
+	if (req.url.includes('//')) {
+		req.url = req.url.replace(/\/+/g, '/');
+	}
 	res.header('Access-Control-Allow-Origin', '*');
 	res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
 	res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
@@ -107,9 +114,11 @@ app.get('/api/versioncheck/v:version', (req, res) => {
 });
 
 app.get('/api/config/v:version', (req, res) => {
+	const forwardedProto = req.get('x-forwarded-proto') || req.protocol;
+	const baseOrigin = (process.env.APP_ORIGIN || process.env.RENDER_EXTERNAL_URL || `${forwardedProto}://${req.get('host')}` || publicOrigin).replace(/\/$/, '');
 	res.json({
 		MessageOfTheDay: process.env.MOTD || "Welcome to Coach's Time Machine! Change this in the .env file.",
-		CdnBaseUri: req.protocol + '://' + req.get('host') + '/cdn',
+		CdnBaseUri: `${baseOrigin}/cdn`,
 		LevelProgressionMaps: LevelProgressionMaps,
 		MatchmakingParams: { PreferFullRoomsFrequency: 1, PreferEmptyRoomsFrequency: 0 },
 		DailyObjectives: DailyObjectives,
